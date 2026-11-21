@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketMind | Discover The Best</title>
+    <!-- New Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">Market<span>Mind</span></a>
+            
+            <div class="search-bar">
+                <input type="text" id="header-search-input" placeholder="Search products...">
+                <button type="button" id="header-search-btn">Search</button>
+            </div>
+
+            <div class="nav-actions">
+                <a href="wishlist.html" class="nav-link">
+                    Wishlist <span class="cart-badge" id="wishlist-count">0</span>
+                </a>
+                <a href="#" class="nav-link" id="cart-nav-link">
+                    Cart <span class="cart-badge" id="cart-count">0</span>
+                </a>
+                <a href="login.html" class="btn-primary">Login</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="app-content">
+        <!-- AI Search Box (Integrated cleanly above hero) -->
+        <div class="ai-search-container">
+            <div class="ai-search-box">
+                <input type="text" id="ai-input" placeholder="✨ Describe what you need to our AI... e.g., 'wireless headphones under $100'">
+                <button type="button" id="ai-search-btn">Ask AI</button>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <span class="hero-tag">• NEW ARRIVALS</span>
+                <h1>Discover The Best Products for You</h1>
+                <p>Explore our wide range of high-quality products at affordable prices. Shop now and enjoy the best deals!</p>
+                <div class="hero-buttons">
+                    <a href="#product-grid" class="btn-primary">Shop Now &rarr;</a>
+                    <a href="#" class="btn-secondary">Explore Deals</a>
+                </div>
+                <div class="social-proof">
+                    <div class="avatars">
+                        <!-- Placeholder avatars -->
+                        <div class="avatar bg-gray"></div>
+                        <div class="avatar bg-dark"></div>
+                        <div class="avatar bg-gray"></div>
+                    </div>
+                    <span>Trusted by 10,000+ Happy Customers</span>
+                </div>
+            </div>
+            <div class="hero-image">
+                <!-- Using a placeholder to represent the beautiful composition in the image -->
+                <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=600&q=80" alt="Hero Products">
+            </div>
+        </section>
+
+        <!-- Features Bar -->
+        <section class="features-bar section-container">
+            <div class="feature-item">
+                <div class="feature-icon">🚚</div>
+                <div>
+                    <h4>Free Shipping</h4>
+                    <p>On orders over $50</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">💳</div>
+                <div>
+                    <h4>Secure Payment</h4>
+                    <p>100% secure payment</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🔄</div>
+                <div>
+                    <h4>Easy Returns</h4>
+                    <p>30 days return policy</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🎧</div>
+                <div>
+                    <h4>24/7 Support</h4>
+                    <p>Dedicated support</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories -->
+        <section class="categories-section section-container">
+            <div class="section-header">
+                <h2>Shop by Categories</h2>
+                <a href="#" class="view-all">View All Categories &rarr;</a>
+            </div>
+            <div class="category-circles" id="category-filters">
+                <div class="category-circle-wrapper" data-category="All">
+                    <div class="circle all-bg"><span>All</span></div>
+                    <span>All Products</span>
+                </div>
+                <div class="category-circle-wrapper" data-category="Electronics">
+                    <div class="circle el-bg"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&q=80" alt="Electronics"></div>
+                    <span>Electronics</span>
+                </div>
+                <div class="category-circle-wrapper" data-category="Fashion">
+                    <div class="circle fa-bg"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&q=80" alt="Fashion"></div>
+                    <span>Fashion</span>
+                </div>
+               <div class="category-circle-wrapper" data-category="Furniture">
+                    <div class="circle fu-bg"><img src="https://images.unsplash.com/photo-1592078615290-033ee584e267?w=200&q=80" alt="Furniture"></div>
+                    <span>Furniture</span>
+                </div>
+                <div class="category-circle-wrapper" data-category="Wearables">
+                    <div class="circle we-bg"><img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&q=80" alt="Wearables"></div>
+                    <span>Wearables</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products -->
+        <section class="featured-products section-container">
+            <div class="section-header">
+                <h2 id="product-section-title">Best Selling Products</h2>
+                <a href="#" class="view-all">View All Products &rarr;</a>
+            </div>
+            <div class="product-grid" id="product-grid">
+                <!-- Injected by JS -->
+            </div>
+        </section>
+
+        <!-- Promo Banner -->
+        <section class="promo-banner section-container">
+            <div class="promo-content">
+                <span class="special-offer">Special Offer</span>
+                <h2>Up to 50% Off</h2>
+                <p>Limited time offer on selected items.<br>Hurry up and grab the best deals!</p>
+                <button class="btn-primary">Shop the Sale &rarr;</button>
+            </div>
+            <div class="promo-image">
+                <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=500&q=80" alt="Shopping Bag Sale">
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="testimonials-section section-container">
+            <h2 class="text-center">What Our Customers Say</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="quote-icon">❝</div>
+                    <p>Amazing products and fast delivery! MarketMind is my go-to store for all my needs.</p>
+                    <div class="customer-info">
+                        <div class="avatar bg-dark"></div>
+                        <div>
+                            <h4>John D.</h4>
+                            <span class="stars">⭐⭐⭐⭐⭐</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="quote-icon">❝</div>
+                    <p>Great quality at affordable prices. The customer support is also very responsive.</p>
+                    <div class="customer-info">
+                        <div class="avatar bg-gray"></div>
+                        <div>
+                            <h4>Sarah M.</h4>
+                            <span class="stars">⭐⭐⭐⭐⭐</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="quote-icon">❝</div>
+                    <p>Very happy with my purchase. Highly recommend MarketMind to everyone!</p>
+                    <div class="customer-info">
+                        <div class="avatar bg-dark"></div>
+                        <div>
+                            <h4>Michael T.</h4>
+                            <span class="stars">⭐⭐⭐⭐⭐</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="section-container footer-grid">
+            <div class="footer-brand">
+                <a href="#" class="logo">Market<span>Mind</span></a>
+                <p>Your one-stop shop for quality products at the best prices.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <a href="#">Home</a>
+                <a href="#">Shop</a>
+                <a href="#">Categories</a>
+            </div>
+            <div class="footer-links">
+                <h4>Customer Service</h4>
+                <a href="#">Track Order</a>
+                <a href="#">Returns & Refunds</a>
+                <a href="#">Shipping Policy</a>
+            </div>
+            <div class="footer-subscribe">
+                <h4>Subscribe to our newsletter</h4>
+                <p>Get the latest updates on new products and upcoming sales.</p>
+                <div class="subscribe-box">
+                    <input type="email" placeholder="Enter your email">
+                    <button class="btn-primary">Subscribe</button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Drawer (Kept intact) -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <div class="cart-drawer" id="cart-drawer">
+        <div class="cart-header">
+            <h2>Your Cart</h2>
+            <button type="button" id="close-cart-btn" class="close-btn">&times;</button>
+        </div>
+        <div class="cart-items" id="cart-items-container"></div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cart-total-price">₹0</span>
+            </div>
+            <button type="button" class="btn-primary w-100" id="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

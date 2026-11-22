@@ -49,6 +49,29 @@ function isInWishlist(productId) {
     return false;
 }
 
+let toastTimer = null;
+
+function showToast(message) {
+    let toast = document.getElementById('mm-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'mm-toast';
+        toast.className = 'toast-notification';
+        document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    toast.classList.add('show');
+
+    if (toastTimer) {
+        clearTimeout(toastTimer);
+    }
+
+    toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2000);
+}
+
 // --- 5. RENDER PRODUCTS (Home Page) ---
 function renderProducts(items) {
     if (!productGrid) return;
@@ -106,6 +129,19 @@ function toggleWishlist(productId) {
         }
     }
 
+    if (foundIndex > -1) {
+        wishlist.splice(foundIndex, 1);
+        showToast("Removed from Wishlist");
+    } else {
+        for (let i = 0; i < PRODUCTS.length; i++) {
+            if (PRODUCTS[i].id === productId) {
+                wishlist.push(PRODUCTS[i]);
+                showToast("Added to Wishlist ❤️");
+                break;
+            }
+        }
+    }
+
     localStorage.setItem('mm_wishlist', JSON.stringify(wishlist));
     updateWishlistUI();
     renderProducts(PRODUCTS);
@@ -143,12 +179,13 @@ function renderWishlistPage() {
                 <div class="price-row">
                     <span class="price">${formatPrice(product.price)}</span>
                 </div>
-                <button type="button" class="btn-primary w-100" onclick="addToCart('${product.id}')">
-                    Move to Cart
+                <button type="button" class="btn-primary w-100" onclick="moveToCart('${product.id}')">
+                Move to Cart
                 </button>
                 <button type="button" class="remove-btn w-100" style="margin-top: 0.5rem;" onclick="toggleWishlist('${product.id}')">
                     Remove
                 </button>
+          
             </div>
         `;
     }
@@ -157,14 +194,42 @@ function renderWishlistPage() {
 
 // --- 7. CART LOGIC ---
 function addToCart(productId) {
-    for (let i = 0; i < PRODUCTS.length; i++) {
-        if (PRODUCTS[i].id === productId) {
-            cart.push(PRODUCTS[i]);
+    cart = JSON.parse(localStorage.getItem('mm_cart')) || [];
+
+    let addedProduct = null;
+    for (let i = 0; i < products.length; i++) {
+        if (products[i].id === productId) {
+            addedProduct = products[i];
+            cart.push(products[i]);
             break;
         }
     }
+
     localStorage.setItem('mm_cart', JSON.stringify(cart));
     updateCartUI();
+
+    if (addedProduct) {
+        showToast("Added to Cart 🛒");
+    }
+}
+
+function moveToCart(productId) {
+    addToCart(productId);
+
+    // Remove item from wishlist after moving to cart
+    wishlist = JSON.parse(localStorage.getItem('mm_wishlist')) || [];
+    const updatedWishlist = [];
+    for (let i = 0; i < wishlist.length; i++) {
+        if (wishlist[i].id !== productId) {
+            updatedWishlist.push(wishlist[i]);
+        }
+    }
+
+    wishlist = updatedWishlist;
+    localStorage.setItem('mm_wishlist', JSON.stringify(wishlist));
+    updateWishlistUI();
+    renderWishlistPage();
+    renderProducts(products);
 }
 
 function removeFromCart(index) {
@@ -246,14 +311,39 @@ function handleStandardSearch() {
     productGrid.scrollIntoView({ behavior: "smooth" });
 }
 
-function handleAISearch() {
+async function handleAISearch() {
     const query = aiSearchInput.value.toLowerCase().trim();
     if (query === "") {
         productTitle.textContent = "Best Selling Products";
-        renderProducts(PRODUCTS);
+        renderProducts(products);
         return;
     }
 
+    try {
+        const response = await fetch("http://localhost:5000/api/ai-search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query })
+        });
+
+        if (!response.ok) {
+            throw new Error("AI search request failed");
+        }
+
+        const data = await response.json();
+        if (data.success && Array.isArray(data.products)) {
+            productTitle.textContent = `✨ AI Recommendations (${data.products.length} found)`;
+            renderProducts(data.products);
+            if (productGrid) {
+                productGrid.scrollIntoView({ behavior: "smooth" });
+            }
+            return;
+        }
+    } catch (err) {
+        console.log("AI search API unavailable, filtering locally:", err.message);
+    }
+
+    // Fallback local filter
     let maxPrice = Infinity;
     const words = query.split(" ");
     for (let i = 0; i < words.length; i++) {
@@ -266,12 +356,13 @@ function handleAISearch() {
     }
 
     const filtered = [];
-    for (let i = 0; i < PRODUCTS.length; i++) {
-        const p = PRODUCTS[i];
+    for (let i = 0; i < products.length; i++) {
+        const p = products[i];
         const matchesPrice = p.price <= maxPrice;
-        const matchesWord = query.includes(p.category.toLowerCase()) ||
-                            p.name.toLowerCase().includes(query) ||
-                            maxPrice !== Infinity;
+        const matchesWord =
+            query.includes(p.category.toLowerCase()) ||
+            p.name.toLowerCase().includes(query) ||
+            maxPrice !== Infinity;
 
         if (matchesPrice && matchesWord) {
             filtered.push(p);
@@ -280,7 +371,9 @@ function handleAISearch() {
 
     productTitle.textContent = `✨ AI Recommendations (${filtered.length} found)`;
     renderProducts(filtered);
-    productGrid.scrollIntoView({ behavior: "smooth" });
+    if (productGrid) {
+        productGrid.scrollIntoView({ behavior: "smooth" });
+    }
 }
 
 // --- USER SESSION IN NAVBAR ---
@@ -382,19 +475,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeCartBtn) closeCartBtn.addEventListener('click', closeCart);
     if (cartOverlay) cartOverlay.addEventListener('click', closeCart);
     if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', () => {
-        const currentUser = JSON.parse(localStorage.getItem('mm_current_user'));
-        if (!currentUser) {
-            alert("Please login first to proceed to checkout.");
-            window.location.href = "login.html";
-            return;
-        }
+        checkoutBtn.addEventListener('click', () => {
+            const currentUser = JSON.parse(localStorage.getItem('mm_current_user'));
+            if (!currentUser) {
+                alert("Please login first to proceed to checkout.");
+                window.location.href = "login.html";
+                return;
+            }
 
-        if (cart.length === 0) {
-            alert("Your cart is empty!");
-        } else {
-            window.location.href = "checkout.html";
-        }
-    });
-}
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+            } else {
+                window.location.href = "checkout.html";
+            }
+        });
+    }
 });

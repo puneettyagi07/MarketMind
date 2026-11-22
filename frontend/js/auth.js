@@ -4,6 +4,8 @@ const tabLogin = document.getElementById('tab-login');
 const tabRegister = document.getElementById('tab-register');
 const authMessage = document.getElementById('auth-message');
 
+const API_BASE = "http://localhost:5000";
+
 function showMessage(text, type) {
     authMessage.textContent = text;
     authMessage.className = `auth-message ${type}`;
@@ -29,10 +31,20 @@ function switchAuthTab(mode) {
     }
 }
 
+function redirectByRole(role) {
+    setTimeout(() => {
+        if (role === 'seller') {
+            window.location.href = "dashboard.html";
+        } else {
+            window.location.href = "index.html";
+        }
+    }, 900);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Handle Register
     if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             hideMessage();
 
@@ -52,71 +64,96 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('mm_users')) || [];
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, role, password })
+                });
 
-            for (let i = 0; i < users.length; i++) {
-                if (users[i].email === email) {
-                    showMessage("An account with this email already exists.", "error");
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    showMessage(data.message || "Registration failed.", "error");
                     return;
                 }
-            }
 
-            const newUser = { name, email, role, password };
-            users.push(newUser);
-            localStorage.setItem('mm_users', JSON.stringify(users));
-            localStorage.setItem('mm_current_user', JSON.stringify({ name, email, role }));
-
-            showMessage(`Account created! Redirecting...`, "success");
-
-            setTimeout(() => {
-                if (role === 'seller') {
-                    window.location.href = "dashboard.html";
-                } else {
-                    window.location.href = "index.html";
+                localStorage.setItem('mm_current_user', JSON.stringify(data.user));
+                showMessage("Account created in database! Redirecting...", "success");
+                redirectByRole(data.user.role);
+            } catch (err) {
+                // Fallback to localStorage if backend server is stopped
+                const users = JSON.parse(localStorage.getItem('mm_users')) || [];
+                for (let i = 0; i < users.length; i++) {
+                    if (users[i].email === email) {
+                        showMessage("An account with this email already exists.", "error");
+                        return;
+                    }
                 }
-            }, 900);
+
+                const newUser = { name, email, role, password };
+                users.push(newUser);
+                localStorage.setItem('mm_users', JSON.stringify(users));
+                localStorage.setItem('mm_current_user', JSON.stringify({ name, email, role }));
+
+                showMessage("Account created locally! Redirecting...", "success");
+                redirectByRole(role);
+            }
         });
     }
 
     // Handle Login
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             hideMessage();
 
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             const password = document.getElementById('login-password').value;
 
-            const users = JSON.parse(localStorage.getItem('mm_users')) || [];
-            let matchedUser = null;
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
 
-            for (let i = 0; i < users.length; i++) {
-                if (users[i].email === email && users[i].password === password) {
-                    matchedUser = users[i];
-                    break;
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    showMessage(data.message || "Invalid email or password.", "error");
+                    return;
                 }
-            }
 
-            if (!matchedUser) {
-                showMessage("Invalid email or password. Try registering first!", "error");
-                return;
-            }
+                localStorage.setItem('mm_current_user', JSON.stringify(data.user));
+                showMessage(`Welcome back, ${data.user.name}!`, "success");
+                redirectByRole(data.user.role);
+            } catch (err) {
+                // Fallback to localStorage if backend server is stopped
+                const users = JSON.parse(localStorage.getItem('mm_users')) || [];
+                let matchedUser = null;
 
-            localStorage.setItem('mm_current_user', JSON.stringify({
-                name: matchedUser.name,
-                email: matchedUser.email,
-                role: matchedUser.role
-            }));
-
-            showMessage(`Welcome back, ${matchedUser.name}!`, "success");
-
-            setTimeout(() => {
-                if (matchedUser.role === 'seller') {
-                    window.location.href = "dashboard.html";
-                } else {
-                    window.location.href = "index.html";
+                for (let i = 0; i < users.length; i++) {
+                    if (users[i].email === email && users[i].password === password) {
+                        matchedUser = users[i];
+                        break;
+                    }
                 }
-            }, 900);
+
+                if (!matchedUser) {
+                    showMessage("Invalid email or password.", "error");
+                    return;
+                }
+
+                localStorage.setItem('mm_current_user', JSON.stringify({
+                    name: matchedUser.name,
+                    email: matchedUser.email,
+                    role: matchedUser.role
+                }));
+
+                showMessage(`Welcome back, ${matchedUser.name}!`, "success");
+                redirectByRole(matchedUser.role);
+            }
         });
     }
 });
